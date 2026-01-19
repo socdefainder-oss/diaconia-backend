@@ -24,7 +24,7 @@ export const uploadImage = async (req: Request, res: Response) => {
       ],
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         url: result.secure_url,
@@ -63,7 +63,7 @@ export const uploadVideo = async (req: Request, res: Response) => {
       eager_async: true,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: {
         url: result.secure_url,
@@ -98,7 +98,7 @@ export const deleteFile = async (req: Request, res: Response) => {
       resource_type: resourceType,
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'Arquivo deletado com sucesso',
     });
