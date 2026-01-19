@@ -24,6 +24,9 @@ import announcementRoutes from './routes/announcementRoutes';
 // Inicializar app
 const app: Application = express();
 
+// Trust proxy - necessário para Render/Heroku/etc
+app.set('trust proxy', 1);
+
 // Conectar ao banco de dados
 connectDB();
 
@@ -72,6 +75,8 @@ const limiter = rateLimit({
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
   message: 'Muitas requisições deste IP, tente novamente mais tarde.',
   skip: (req) => req.method === 'OPTIONS', // Pular rate limit para preflight
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 app.use('/api/', limiter);
 
