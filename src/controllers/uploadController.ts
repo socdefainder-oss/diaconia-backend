@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { v2 as cloudinary } from 'cloudinary';
 
 // Upload de imagem
-export const uploadImage = async (req: Request, res: Response) => {
+export const uploadImage = async (req: Request, res: Response): Promise<void> => {
   try {
     const { file } = req.body;
 
@@ -42,7 +42,7 @@ export const uploadImage = async (req: Request, res: Response) => {
 };
 
 // Upload de vídeo
-export const uploadVideo = async (req: Request, res: Response) => {
+export const uploadVideo = async (req: Request, res: Response): Promise<void> => {
   try {
     const { file } = req.body;
 
@@ -83,7 +83,7 @@ export const uploadVideo = async (req: Request, res: Response) => {
 };
 
 // Deletar arquivo do Cloudinary
-export const deleteFile = async (req: Request, res: Response) => {
+export const deleteFile = async (req: Request, res: Response): Promise<void> => {
   try {
     const { publicId, resourceType = 'image' } = req.body;
 

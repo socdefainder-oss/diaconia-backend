@@ -43,18 +43,30 @@ export enum CourseStatus {
   ARCHIVED = 'archived',
 }
 
+export interface IResource {
+  name: string;
+  url: string;
+  type: 'pdf' | 'video' | 'link' | 'image' | 'document';
+  size?: number;
+}
+
 export interface ILesson {
   title: string;
   description?: string;
   content?: string;
   videoUrl?: string;
-  duration?: number; // em minutos
+  videoDuration?: number; // em segundos
+  duration?: number; // em minutos (compatibilidade)
   order: number;
-  resources?: {
-    name: string;
-    url: string;
-    type: string;
-  }[];
+  resources?: IResource[];
+  isPreview?: boolean;
+}
+
+export interface IModule {
+  title: string;
+  description?: string;
+  order: number;
+  lessons: ILesson[];
 }
 
 export interface ICourse extends Document {
@@ -64,10 +76,13 @@ export interface ICourse extends Document {
   instructor: IUser['_id'];
   category: string;
   status: CourseStatus;
-  lessons: ILesson[];
+  modules?: IModule[]; // Nova estrutura hierárquica
+  lessons: ILesson[]; // Compatibilidade com estrutura antiga
   enrolledStudents: IUser['_id'][];
   duration?: number; // total em minutos
+  totalLessons?: number; // total de aulas
   level?: 'iniciante' | 'intermediário' | 'avançado';
+  certificateEnabled?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

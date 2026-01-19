@@ -5,7 +5,7 @@ import {
   updateWatchTime,
   checkLessonAccess,
 } from '../controllers/progressController';
-import { authenticate } from '../middleware/auth';
+import { authenticate } from '../middlewares/auth';
 
 const router = express.Router();
 

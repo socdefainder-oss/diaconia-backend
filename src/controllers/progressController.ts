@@ -1,9 +1,10 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
+import { AuthRequest } from '../types';
 import CourseProgress from '../models/CourseProgress';
 import Course from '../models/Course';
 
 // Obter progresso de um curso
-export const getCourseProgress = async (req: Request, res: Response) => {
+export const getCourseProgress = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId } = req.params;
     const userId = req.user?._id;
@@ -35,7 +36,7 @@ export const getCourseProgress = async (req: Request, res: Response) => {
 };
 
 // Marcar aula como completa
-export const completeLesson = async (req: Request, res: Response) => {
+export const completeLesson = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId, moduleId, lessonId } = req.params;
     const userId = req.user?._id;
@@ -104,7 +105,7 @@ export const completeLesson = async (req: Request, res: Response) => {
 };
 
 // Atualizar tempo assistido
-export const updateWatchTime = async (req: Request, res: Response) => {
+export const updateWatchTime = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId, moduleId, lessonId } = req.params;
     const { watchedDuration } = req.body;
@@ -154,7 +155,7 @@ export const updateWatchTime = async (req: Request, res: Response) => {
 };
 
 // Verificar se uma aula está bloqueada
-export const checkLessonAccess = async (req: Request, res: Response) => {
+export const checkLessonAccess = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { courseId, moduleId, lessonId } = req.params;
     const userId = req.user?._id;

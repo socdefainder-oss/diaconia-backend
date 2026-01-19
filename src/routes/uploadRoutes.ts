@@ -1,6 +1,6 @@
 import express from 'express';
 import { uploadImage, uploadVideo, deleteFile } from '../controllers/uploadController';
-import { authenticate, authorize } from '../middleware/auth';
+import { authenticate, authorize } from '../middlewares/auth';
 import { UserRole } from '../types';
 
 const router = express.Router();
