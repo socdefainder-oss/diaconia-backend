@@ -33,11 +33,11 @@ app.use(helmet({
 }));
 
 // CORS configurado para múltiplas origens
-const allowedOrigins = [
+const allowedOrigins: string[] = [
   'https://diaconia-frontend.vercel.app',
   'http://localhost:3000',
-  process.env.FRONTEND_URL
-].filter(Boolean);
+  process.env.FRONTEND_URL || ''
+].filter(Boolean) as string[];
 
 app.use(cors({
   origin: allowedOrigins,
@@ -57,9 +57,10 @@ app.use((req, res, next) => {
   }
   
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
+    res.sendStatus(200);
+  } else {
+    next();
   }
-  next();
 });
 
 // Rate limiting
