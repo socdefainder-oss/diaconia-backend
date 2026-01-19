@@ -155,7 +155,7 @@ export const updateWatchTime = async (req: AuthRequest, res: Response) => {
 };
 
 // Verificar se uma aula está bloqueada
-export const checkLessonAccess = async (req: AuthRequest, res: Response): Promise<void> => {
+export const checkLessonAccess = async (req: AuthRequest, res: Response) => {
   try {
     const { courseId, moduleId, lessonId } = req.params;
     const userId = req.user?._id;

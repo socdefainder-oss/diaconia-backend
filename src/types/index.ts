@@ -51,6 +51,7 @@ export interface IResource {
 }
 
 export interface ILesson {
+  _id?: string;
   title: string;
   description?: string;
   content?: string;
@@ -63,6 +64,7 @@ export interface ILesson {
 }
 
 export interface IModule {
+  _id?: string;
   title: string;
   description?: string;
   order: number;

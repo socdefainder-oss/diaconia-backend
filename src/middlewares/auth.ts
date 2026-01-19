@@ -88,3 +88,6 @@ export const authorize = (...roles: UserRole[]) => {
     next();
   };
 };
+
+// Alias para protect
+export const authenticate = protect;
