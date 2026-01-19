@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import jwt from 'jsonwebtoken';
+import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 import crypto from 'crypto';
 import User from '../models/User';
 import { AuthRequest, ApiResponse, UserRole } from '../types';
@@ -7,9 +7,9 @@ import emailService from '../config/email';
 
 // Gerar JWT Token
 const generateToken = (userId: string, role: UserRole): string => {
-  const secret: string = process.env.JWT_SECRET || 'fallback-secret';
-  const expiresIn: string = process.env.JWT_EXPIRES_IN || '7d';
-  return jwt.sign({ userId, role }, secret, { expiresIn });
+  const secret: Secret = process.env.JWT_SECRET || 'fallback-secret';
+  const options: SignOptions = { expiresIn: process.env.JWT_EXPIRES_IN || '7d' };
+  return jwt.sign({ userId, role }, secret, options);
 };
 
 // @desc    Registrar novo usuário
