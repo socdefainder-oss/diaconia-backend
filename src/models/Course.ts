@@ -1,6 +1,25 @@
 import mongoose, { Schema } from 'mongoose';
 import { ICourse, CourseStatus } from '../types';
 
+// Schema para recursos (arquivos, links)
+const resourceSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  url: {
+    type: String,
+    required: true,
+  },
+  type: {
+    type: String,
+    enum: ['pdf', 'video', 'link', 'image', 'document'],
+    required: true,
+  },
+  size: Number,
+});
+
+// Schema para aulas
 const lessonSchema = new Schema({
   title: {
     type: String,
@@ -9,18 +28,30 @@ const lessonSchema = new Schema({
   description: String,
   content: String,
   videoUrl: String,
-  duration: Number,
+  videoDuration: Number, // duração em segundos
   order: {
     type: Number,
     required: true,
   },
-  resources: [
-    {
-      name: String,
-      url: String,
-      type: String,
-    },
-  ],
+  resources: [resourceSchema],
+  isPreview: {
+    type: Boolean,
+    default: false, // aulas preview podem ser vistas sem matrícula
+  },
+});
+
+// Schema para módulos
+const moduleSchema = new Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  description: String,
+  order: {
+    type: Number,
+    required: true,
+  },
+  lessons: [lessonSchema],
 });
 
 const courseSchema = new Schema<ICourse>(
@@ -56,7 +87,8 @@ const courseSchema = new Schema<ICourse>(
       enum: Object.values(CourseStatus),
       default: CourseStatus.DRAFT,
     },
-    lessons: [lessonSchema],
+    modules: [moduleSchema], // NOVO: módulos hierárquicos
+    lessons: [lessonSchema], // MANTIDO para compatibilidade
     enrolledStudents: [
       {
         type: Schema.Types.ObjectId,
@@ -72,17 +104,45 @@ const courseSchema = new Schema<ICourse>(
       enum: ['iniciante', 'intermediário', 'avançado'],
       default: 'iniciante',
     },
+    totalLessons: {
+      type: Number,
+      default: 0,
+    },
+    certificateEnabled: {
+      type: Boolean,
+      default: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// Calcular duração total automaticamente
+// Calcular duração e total de aulas automaticamente
 courseSchema.pre('save', function (next) {
-  if (this.lessons && this.lessons.length > 0) {
-    this.duration = this.lessons.reduce((total, lesson) => total + (lesson.duration || 0), 0);
+  let totalDuration = 0;
+  let totalLessons = 0;
+
+  // Calcular a partir dos módulos (nova estrutura)
+  if (this.modules && this.modules.length > 0) {
+    this.modules.forEach((module: any) => {
+      if (module.lessons && module.lessons.length > 0) {
+        totalLessons += module.lessons.length;
+        module.lessons.forEach((lesson: any) => {
+          totalDuration += lesson.videoDuration || 0;
+        });
+      }
+    });
   }
+  
+  // Fallback para estrutura antiga (lessons diretas)
+  if (this.lessons && this.lessons.length > 0 && totalLessons === 0) {
+    totalLessons = this.lessons.length;
+    totalDuration = this.lessons.reduce((total, lesson: any) => total + (lesson.duration || 0), 0);
+  }
+
+  this.duration = totalDuration;
+  this.totalLessons = totalLessons;
   next();
 });
 

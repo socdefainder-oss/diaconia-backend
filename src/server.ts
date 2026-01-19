@@ -20,6 +20,8 @@ import userRoutes from './routes/userRoutes';
 import courseRoutes from './routes/courseRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
 import announcementRoutes from './routes/announcementRoutes';
+import uploadRoutes from './routes/uploadRoutes';
+import progressRoutes from './routes/progressRoutes';
 
 // Inicializar app
 const app: Application = express();
@@ -105,6 +107,8 @@ app.get('/', (_req: Request, res: Response) => {
       courses: '/api/courses',
       schedules: '/api/schedules',
       announcements: '/api/announcements',
+      upload: '/api/upload',
+      progress: '/api/progress',
     },
   });
 });
@@ -122,6 +126,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api/schedules', scheduleRoutes);
 app.use('/api/announcements', announcementRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/progress', progressRoutes);
 
 // 404 handler
 app.use('*', (req: Request, res: Response) => {
