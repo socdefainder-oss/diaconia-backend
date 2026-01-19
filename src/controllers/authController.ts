@@ -7,11 +7,9 @@ import emailService from '../config/email';
 
 // Gerar JWT Token
 const generateToken = (userId: string, role: UserRole): string => {
-  return jwt.sign(
-    { userId, role },
-    process.env.JWT_SECRET!,
-    { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
-  );
+  const secret = process.env.JWT_SECRET || 'fallback-secret';
+  const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+  return jwt.sign({ userId, role }, secret, { expiresIn });
 };
 
 // @desc    Registrar novo usuário
