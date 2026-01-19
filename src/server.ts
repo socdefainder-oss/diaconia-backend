@@ -27,47 +27,49 @@ const app: Application = express();
 // Conectar ao banco de dados
 connectDB();
 
-// Middlewares de segurança
-app.use(helmet({
-  crossOriginResourcePolicy: false,
-}));
-
-// CORS configurado para múltiplas origens
+// CORS - DEVE VIR ANTES DE TUDO
 const allowedOrigins: string[] = [
   'https://diaconia-frontend.vercel.app',
   'http://localhost:3000',
   process.env.FRONTEND_URL || ''
 ].filter(Boolean) as string[];
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
-
-// Adicionar headers CORS manualmente para garantir
+// Headers CORS manuais (mais confiável)
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  
+  // Permitir todas as origens da lista
   if (origin && allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  } else {
+    res.setHeader('Access-Control-Allow-Origin', 'https://diaconia-frontend.vercel.app');
   }
   
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  
+  // Handle preflight
   if (req.method === 'OPTIONS') {
-    res.sendStatus(200);
-  } else {
-    next();
+    return res.status(200).end();
   }
+  
+  next();
 });
+
+// Middlewares de segurança
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutos
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'),
   message: 'Muitas requisições deste IP, tente novamente mais tarde.',
+  skip: (req) => req.method === 'OPTIONS', // Pular rate limit para preflight
 });
 app.use('/api/', limiter);
 
