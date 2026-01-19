@@ -9,7 +9,7 @@ import emailService from '../config/email';
 const generateToken = (userId: string, role: UserRole): string => {
   return jwt.sign(
     { userId, role },
-    process.env.JWT_SECRET as string,
+    process.env.JWT_SECRET!,
     { expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as string }
   );
 };
@@ -287,3 +287,4 @@ export const forgotPassword = async (req: Request, res: Response): Promise<void>
     } as ApiResponse);
   }
 };
+
