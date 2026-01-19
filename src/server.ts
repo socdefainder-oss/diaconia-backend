@@ -22,6 +22,7 @@ import scheduleRoutes from './routes/scheduleRoutes';
 import announcementRoutes from './routes/announcementRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import progressRoutes from './routes/progressRoutes';
+import certificateRoutes from './routes/certificateRoutes';
 
 // Inicializar app
 const app: Application = express();
@@ -128,6 +129,7 @@ app.use('/api/schedules', scheduleRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/progress', progressRoutes);
+app.use('/api/certificates', certificateRoutes);
 
 // 404 handler
 app.use('*', (req: Request, res: Response) => {
