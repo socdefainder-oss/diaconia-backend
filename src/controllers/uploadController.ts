@@ -33,7 +33,7 @@ export const uploadImage = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Erro no upload de imagem:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Erro ao fazer upload da imagem',
       error: error.message,
@@ -74,7 +74,7 @@ export const uploadVideo = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Erro no upload de vídeo:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Erro ao fazer upload do vídeo',
       error: error.message,
@@ -104,7 +104,7 @@ export const deleteFile = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Erro ao deletar arquivo:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Erro ao deletar arquivo',
       error: error.message,

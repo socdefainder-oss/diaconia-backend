@@ -187,7 +187,14 @@ export const checkLessonAccess = async (req: AuthRequest, res: Response) => {
     }
 
     const module = course.modules[moduleIndex];
-    const lessonIndex = module.lessons.findIndex((l: any) => l._id.toString() === lessonId);
+    if (!module.lessons || module.lessons.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Módulo sem aulas',
+      });
+    }
+
+    const lessonIndex = module.lessons.findIndex((l: any) => l._id?.toString() === lessonId);
     if (lessonIndex === -1) {
       return res.status(404).json({
         success: false,
@@ -208,29 +215,36 @@ export const checkLessonAccess = async (req: AuthRequest, res: Response) => {
 
     if (lessonIndex > 0) {
       // Aula anterior no mesmo módulo
-      const previousLessonId = module.lessons[lessonIndex - 1]._id.toString();
-      previousCompleted = progress?.completedLessons.some(
-        (l) => l.lessonId === previousLessonId && l.moduleId === moduleId && l.completed
-      ) || false;
+      const previousLesson = module.lessons[lessonIndex - 1];
+      const previousLessonId = previousLesson._id?.toString();
+      if (previousLessonId) {
+        previousCompleted = progress?.completedLessons.some(
+          (l) => l.lessonId === previousLessonId && l.moduleId === moduleId && l.completed
+        ) || false;
+      }
     } else if (moduleIndex > 0) {
       // Última aula do módulo anterior
       const previousModule = course.modules[moduleIndex - 1];
-      const lastLesson = previousModule.lessons[previousModule.lessons.length - 1];
-      const previousModuleId = previousModule._id.toString();
-      const lastLessonId = lastLesson._id.toString();
-      
-      previousCompleted = progress?.completedLessons.some(
-        (l) => l.lessonId === lastLessonId && l.moduleId === previousModuleId && l.completed
-      ) || false;
+      if (previousModule.lessons && previousModule.lessons.length > 0) {
+        const lastLesson = previousModule.lessons[previousModule.lessons.length - 1];
+        const previousModuleId = previousModule._id?.toString();
+        const lastLessonId = lastLesson._id?.toString();
+        
+        if (previousModuleId && lastLessonId) {
+          previousCompleted = progress?.completedLessons.some(
+            (l) => l.lessonId === lastLessonId && l.moduleId === previousModuleId && l.completed
+          ) || false;
+        }
+      }
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: { unlocked: previousCompleted },
     });
   } catch (error: any) {
     console.error('Erro ao verificar acesso:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Erro ao verificar acesso à aula',
       error: error.message,
