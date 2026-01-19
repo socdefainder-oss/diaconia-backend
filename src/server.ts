@@ -1,4 +1,4 @@
-import express, { Application, Request, Response } from 'express';
+﻿import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -29,8 +29,23 @@ connectDB();
 
 // Middlewares de segurança
 app.use(helmet());
+
+// CORS configurado para múltiplas origens
+const allowedOrigins = [
+  'https://diaconia-frontend.vercel.app',
+  'http://localhost:3000',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Permitir requisições sem origin (mobile apps, Postman, etc)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 
@@ -59,7 +74,7 @@ if (process.env.NODE_ENV === 'development') {
 app.get('/', (_req: Request, res: Response) => {
   res.json({
     success: true,
-    message: '🙏 API Diaconia AD Alpha - Backend',
+    message: ' API Diaconia AD Alpha - Backend',
     version: '1.0.0',
     endpoints: {
       auth: '/api/auth',
@@ -102,26 +117,26 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`
-    ╔═══════════════════════════════════════╗
-    ║                                       ║
-    ║   🙏 DIACONIA AD ALPHA - BACKEND 🙏   ║
-    ║                                       ║
-    ║   Servidor rodando na porta: ${PORT}     ║
-    ║   Ambiente: ${process.env.NODE_ENV || 'development'}            ║
-    ║                                       ║
-    ╚═══════════════════════════════════════╝
+    
+                                           
+        DIACONIA AD ALPHA - BACKEND    
+                                           
+       Servidor rodando na porta: ${PORT}     
+       Ambiente: ${process.env.NODE_ENV || 'development'}            
+                                           
+    
   `);
 });
 
 // Tratamento de erros não capturados
 process.on('unhandledRejection', (err: Error) => {
-  console.error('❌ UNHANDLED REJECTION! Encerrando...');
+  console.error(' UNHANDLED REJECTION! Encerrando...');
   console.error(err.name, err.message);
   process.exit(1);
 });
 
 process.on('uncaughtException', (err: Error) => {
-  console.error('❌ UNCAUGHT EXCEPTION! Encerrando...');
+  console.error(' UNCAUGHT EXCEPTION! Encerrando...');
   console.error(err.name, err.message);
   process.exit(1);
 });
