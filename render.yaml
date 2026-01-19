@@ -1,0 +1,5 @@
+# Build command
+build: npm install && npm run build
+
+# Start command  
+start: node dist/server.js
