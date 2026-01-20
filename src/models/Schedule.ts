@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+﻿import mongoose, { Schema } from 'mongoose';
 import { ISchedule, ScheduleStatus, ScheduleFunction } from '../types';
 
 const scheduleSchema = new Schema<ISchedule>(
@@ -28,6 +28,10 @@ const scheduleSchema = new Schema<ISchedule>(
       type: String,
       enum: Object.values(ScheduleFunction),
       required: [true, 'Função é obrigatória'],
+    },
+    team: {
+      type: Schema.Types.ObjectId,
+      ref: 'Team',
     },
     assignedTo: {
       type: Schema.Types.ObjectId,
