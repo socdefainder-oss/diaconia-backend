@@ -117,6 +117,7 @@ export interface ISchedule extends Document {
   startTime: string;
   endTime: string;
   function: ScheduleFunction;
+  team?: mongoose.Types.ObjectId;
   assignedTo: IUser['_id'];
   substitute?: IUser['_id'];
   status: ScheduleStatus;

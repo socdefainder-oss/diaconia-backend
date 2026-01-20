@@ -2,7 +2,7 @@
 import Team from '../models/Team';
 import { AuthRequest, ApiResponse } from '../types';
 
-export const getTeams = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getTeams = async (req: AuthRequest, res: Response): Promise<Response> => {
   try {
     const teams = await Team.find({ isActive: true })
       .populate('members', 'name email avatar')
@@ -21,7 +21,7 @@ export const getTeams = async (req: AuthRequest, res: Response): Promise<void> =
   }
 };
 
-export const getTeam = async (req: AuthRequest, res: Response): Promise<void> => {
+export const getTeam = async (req: AuthRequest, res: Response): Promise<Response> => {
   try {
     const team = await Team.findById(req.params.id).populate('members', 'name email avatar');
 
@@ -45,7 +45,7 @@ export const getTeam = async (req: AuthRequest, res: Response): Promise<void> =>
   }
 };
 
-export const createTeam = async (req: AuthRequest, res: Response): Promise<void> => {
+export const createTeam = async (req: AuthRequest, res: Response): Promise<Response> => {
   try {
     const team = await Team.create(req.body);
 
@@ -63,7 +63,7 @@ export const createTeam = async (req: AuthRequest, res: Response): Promise<void>
   }
 };
 
-export const updateTeam = async (req: AuthRequest, res: Response): Promise<void> => {
+export const updateTeam = async (req: AuthRequest, res: Response): Promise<Response> => {
   try {
     const team = await Team.findByIdAndUpdate(
       req.params.id,
@@ -92,7 +92,7 @@ export const updateTeam = async (req: AuthRequest, res: Response): Promise<void>
   }
 };
 
-export const deleteTeam = async (req: AuthRequest, res: Response): Promise<void> => {
+export const deleteTeam = async (req: AuthRequest, res: Response): Promise<Response> => {
   try {
     const team = await Team.findByIdAndUpdate(
       req.params.id,
@@ -120,7 +120,7 @@ export const deleteTeam = async (req: AuthRequest, res: Response): Promise<void>
   }
 };
 
-export const addMemberToTeam = async (req: AuthRequest, res: Response): Promise<void> => {
+export const addMemberToTeam = async (req: AuthRequest, res: Response): Promise<Response> => {
   try {
     const { userId } = req.body;
     
@@ -151,7 +151,7 @@ export const addMemberToTeam = async (req: AuthRequest, res: Response): Promise<
   }
 };
 
-export const removeMemberFromTeam = async (req: AuthRequest, res: Response): Promise<void> => {
+export const removeMemberFromTeam = async (req: AuthRequest, res: Response): Promise<Response> => {
   try {
     const { userId } = req.params;
     
