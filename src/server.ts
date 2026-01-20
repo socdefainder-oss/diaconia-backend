@@ -23,6 +23,7 @@ import announcementRoutes from './routes/announcementRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import progressRoutes from './routes/progressRoutes';
 import certificateRoutes from './routes/certificateRoutes';
+import debugRoutes from './routes/debugRoutes';
 
 // Inicializar app
 const app: Application = express();
@@ -130,6 +131,7 @@ app.use('/api/announcements', announcementRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/certificates', certificateRoutes);
+app.use('/api/debug', debugRoutes); // Rota de debug temporária
 
 // 404 handler
 app.use('*', (req: Request, res: Response) => {
