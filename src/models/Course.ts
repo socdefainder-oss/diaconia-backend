@@ -1,4 +1,4 @@
-import mongoose, { Schema } from 'mongoose';
+﻿import mongoose, { Schema } from 'mongoose';
 import { ICourse, CourseStatus } from '../types';
 
 // Schema para recursos (arquivos, links)
@@ -155,3 +155,4 @@ courseSchema.index({ instructor: 1 });
 const Course = mongoose.model<ICourse>('Course', courseSchema);
 
 export default Course;
+
