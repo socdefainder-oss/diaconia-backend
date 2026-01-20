@@ -1,5 +1,6 @@
 ﻿import { Request } from 'express';
 import { Document } from 'mongoose';
+import mongoose from 'mongoose';
 
 // User Types
 export enum UserRole {
