@@ -65,13 +65,13 @@ router.post('/create-user', async (req: Request, res: Response) => {
       emailVerified: true,
     });
 
-    res.json({
+    return res.json({
       message: 'Usuário criado',
       email: user.email,
       role: user.role,
     });
   } catch (error: any) {
-    res.status(500).json({
+    return res.status(500).json({
       error: error.message,
     });
   }
