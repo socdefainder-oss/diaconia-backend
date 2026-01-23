@@ -17,7 +17,13 @@ const generateToken = (userId: string, role: UserRole): string => {
 // @access  Public
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password, role } = req.body;
+    let { name, email, password, role, phone } = req.body;
+
+    // Normalizar email para Gmail (remover pontos antes do @)
+    const emailParts = email.split('@');
+    if (emailParts.length === 2 && emailParts[1].toLowerCase() === 'gmail.com') {
+      email = emailParts[0].replace(/\./g, '') + '@' + emailParts[1];
+    }
 
     // Verificar se usuário já existe
     const userExists = await User.findOne({ email });
@@ -35,17 +41,20 @@ export const register = async (req: Request, res: Response): Promise<void> => {
       email,
       password,
       role: role || UserRole.ALUNO,
+      phone,
     });
 
-    // Enviar email de boas-vindas
-    try {
-      await emailService.sendWelcomeEmail(user.name, user.email);
-    } catch (error) {
-      console.log('Erro ao enviar email de boas-vindas:', error);
-    }
-
-    // Gerar token
+    // Gerar token primeiro
     const token = generateToken(user._id.toString(), user.role);
+
+    // Enviar email de boas-vindas de forma assíncrona (não bloqueia o response)
+    setImmediate(async () => {
+      try {
+        await emailService.sendWelcomeEmail(user.name, user.email);
+      } catch (error) {
+        console.log('Erro ao enviar email de boas-vindas:', error);
+      }
+    });
 
     res.status(201).json({
       success: true,
@@ -75,7 +84,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 // @access  Public
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    // Normalizar email para Gmail (remover pontos antes do @)
+    const emailParts = email.split('@');
+    if (emailParts.length === 2 && emailParts[1].toLowerCase() === 'gmail.com') {
+      email = emailParts[0].replace(/\./g, '') + '@' + emailParts[1];
+    }
 
     // Verificar se usuário existe
     const user = await User.findOne({ email }).select('+password');

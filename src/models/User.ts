@@ -57,6 +57,11 @@ const userSchema = new Schema<IUser>(
       state: String,
       zipCode: String,
     },
+    team: {
+      type: Schema.Types.ObjectId,
+      ref: 'Team',
+      default: null,
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -79,6 +84,15 @@ const userSchema = new Schema<IUser>(
 
 // Hash password antes de salvar
 userSchema.pre('save', async function (next) {
+  // Normalizar email para Gmail (remover pontos antes do @)
+  if (this.isModified('email')) {
+    const emailParts = this.email.split('@');
+    if (emailParts.length === 2 && emailParts[1].toLowerCase() === 'gmail.com') {
+      // Remove pontos do nome de usuário do Gmail
+      this.email = emailParts[0].replace(/\./g, '') + '@' + emailParts[1];
+    }
+  }
+
   if (!this.isModified('password')) {
     return next();
   }

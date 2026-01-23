@@ -26,6 +26,7 @@ export interface IUser extends Document {
     state?: string;
     zipCode?: string;
   };
+  team?: mongoose.Types.ObjectId;
   isActive: boolean;
   emailVerified: boolean;
   createdAt: Date;
