@@ -208,7 +208,16 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
     progress.completed = completedCount >= totalLessons && totalLessons > 0;
     progress.lastAccessedAt = new Date();
 
-    console.log('Saving progress:', { totalLessons, completedCount, progressPercent: progress.progress });
+    console.log('Saving progress:', { 
+      totalLessons, 
+      completedCount, 
+      progressPercent: progress.progress,
+      completedLessons: progress.completedLessons.map((lp: any) => ({ 
+        lessonId: lp.lessonId, 
+        completed: lp.completed,
+        quizPassed: lp.quizPassed 
+      }))
+    });
     await progress.save();
     console.log('Progress saved successfully');
 
