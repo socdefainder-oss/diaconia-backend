@@ -145,6 +145,63 @@ export const updateCourse = async (req: AuthRequest, res: Response): Promise<voi
       return;
     }
 
+    // Validar quiz se estiver presente
+    if (req.body.lessons) {
+      for (const lesson of req.body.lessons) {
+        if (lesson.quiz && lesson.quiz.length > 0) {
+          // Validar que tem 5 perguntas
+          if (lesson.quiz.length !== 5) {
+            res.status(400).json({
+              success: false,
+              message: `Aula "${lesson.title}" deve ter exatamente 5 perguntas no quiz`,
+            } as ApiResponse);
+            return;
+          }
+
+          // Validar cada pergunta
+          for (let i = 0; i < lesson.quiz.length; i++) {
+            const question = lesson.quiz[i];
+            
+            if (!question.question || question.question.trim() === '') {
+              res.status(400).json({
+                success: false,
+                message: `Pergunta ${i + 1} da aula "${lesson.title}" está vazia`,
+              } as ApiResponse);
+              return;
+            }
+
+            if (!question.options || question.options.length !== 4) {
+              res.status(400).json({
+                success: false,
+                message: `Pergunta ${i + 1} da aula "${lesson.title}" deve ter exatamente 4 opções`,
+              } as ApiResponse);
+              return;
+            }
+
+            const correctOptions = question.options.filter((o: any) => o.isCorrect);
+            if (correctOptions.length !== 1) {
+              res.status(400).json({
+                success: false,
+                message: `Pergunta ${i + 1} da aula "${lesson.title}" deve ter exatamente 1 opção correta`,
+              } as ApiResponse);
+              return;
+            }
+
+            // Validar que todas as opções têm texto
+            for (let j = 0; j < question.options.length; j++) {
+              if (!question.options[j].text || question.options[j].text.trim() === '') {
+                res.status(400).json({
+                  success: false,
+                  message: `Opção ${j + 1} da pergunta ${i + 1} da aula "${lesson.title}" está vazia`,
+                } as ApiResponse);
+                return;
+              }
+            }
+          }
+        }
+      }
+    }
+
     Object.assign(course, req.body);
     await course.save();
 
@@ -154,6 +211,7 @@ export const updateCourse = async (req: AuthRequest, res: Response): Promise<voi
       data: course,
     } as ApiResponse);
   } catch (error: any) {
+    console.error('Erro ao atualizar curso:', error);
     res.status(500).json({
       success: false,
       message: 'Erro ao atualizar curso',
