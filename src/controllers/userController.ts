@@ -2,6 +2,43 @@ import { Response } from 'express';
 import User from '../models/User';
 import { AuthRequest, ApiResponse, UserRole } from '../types';
 
+export const createUser = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { name, email, password, role, phone } = req.body;
+
+    // Verificar se usuário já existe
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      res.status(400).json({
+        success: false,
+        message: 'Email já cadastrado',
+      } as ApiResponse);
+      return;
+    }
+
+    // Criar usuário
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: role || UserRole.ALUNO,
+      phone,
+    });
+
+    res.status(201).json({
+      success: true,
+      message: 'Usuário criado com sucesso',
+      data: user,
+    } as ApiResponse);
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: 'Erro ao criar usuário',
+      error: error.message,
+    } as ApiResponse);
+  }
+};
+
 export const getUsers = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const { role, search, page = 1, limit = 20 } = req.query;

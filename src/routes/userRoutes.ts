@@ -10,6 +10,7 @@ const router = express.Router();
 router.use(protect);
 router.use(authorize(UserRole.ADMIN));
 
+router.post('/', userController.createUser);
 router.get('/', userController.getUsers);
 router.get('/stats', userController.getDashboardStats);
 router.get('/:id', idValidator, validate, userController.getUser);
