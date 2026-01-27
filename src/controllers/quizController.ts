@@ -146,9 +146,13 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
     
     if (!progress) {
       // Criar progresso se não existir
+      console.log('Creating new progress for user');
       progress = new CourseProgress({
         userId,
         courseId,
+        enrolledAt: new Date(),
+        progress: 0,
+        completed: false,
         completedLessons: [],
       });
     }
@@ -176,6 +180,7 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
       console.log('Updated existing lesson progress');
     } else {
       // Adicionar novo progresso
+      console.log('Creating new lesson progress entry');
       progress.completedLessons.push({
         lessonId,
         moduleId: normalizedModuleId,
@@ -185,15 +190,24 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
         quizScore: score,
         quizPassed: passed,
         quizAttempts: 1,
-      });
+        completedAt: passed ? new Date() : undefined,
+      } as any);
     }
 
     // Recalcular progresso geral
-    const totalLessons = course.totalLessons || 0;
+    let totalLessons = 0;
+    if (course.modules && course.modules.length > 0) {
+      totalLessons = course.modules.reduce((sum: number, mod: any) => sum + (mod.lessons?.length || 0), 0);
+    } else if (course.lessons) {
+      totalLessons = course.lessons.length;
+    }
+    
     const completedCount = progress.completedLessons.filter((lp: any) => lp.completed).length;
     progress.progress = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
+    progress.completed = completedCount >= totalLessons && totalLessons > 0;
     progress.lastAccessedAt = new Date();
 
+    console.log('Saving progress:', { totalLessons, completedCount, progressPercent: progress.progress });
     await progress.save();
     console.log('Progress saved successfully');
 
@@ -210,9 +224,14 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
     });
     console.log('Response sent:', { score, passed, correctAnswers });
     return;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Erro ao submeter quiz:', error);
-    res.status(500).json({ message: 'Erro ao submeter quiz' });
+    console.error('Stack trace:', error.stack);
+    res.status(500).json({ 
+      message: 'Erro ao submeter quiz',
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
     return;
   }
 };
