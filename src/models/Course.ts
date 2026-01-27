@@ -19,6 +19,41 @@ const resourceSchema = new Schema({
   size: Number,
 });
 
+// Schema para opções de pergunta
+const quizOptionSchema = new Schema({
+  text: {
+    type: String,
+    required: true,
+  },
+  isCorrect: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+});
+
+// Schema para perguntas do quiz
+const quizQuestionSchema = new Schema({
+  question: {
+    type: String,
+    required: true,
+  },
+  options: {
+    type: [quizOptionSchema],
+    required: true,
+    validate: {
+      validator: function(options: any[]) {
+        return options.length === 4 && options.filter(o => o.isCorrect).length === 1;
+      },
+      message: 'Cada pergunta deve ter exatamente 4 opções e apenas 1 correta',
+    },
+  },
+  order: {
+    type: Number,
+    required: true,
+  },
+});
+
 // Schema para aulas
 const lessonSchema = new Schema({
   title: {
@@ -37,6 +72,15 @@ const lessonSchema = new Schema({
   isPreview: {
     type: Boolean,
     default: false, // aulas preview podem ser vistas sem matrícula
+  },
+  quiz: {
+    type: [quizQuestionSchema],
+    validate: {
+      validator: function(quiz: any[]) {
+        return !quiz || quiz.length === 0 || quiz.length === 5;
+      },
+      message: 'O quiz deve ter exatamente 5 perguntas ou estar vazio',
+    },
   },
 });
 

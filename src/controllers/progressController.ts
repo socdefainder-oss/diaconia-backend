@@ -66,6 +66,9 @@ export const completeLesson = async (req: AuthRequest, res: Response) => {
         completed: true,
         completedAt: new Date(),
         watchedDuration: 0,
+        quizCompleted: false,
+        quizPassed: false,
+        quizAttempts: 0,
       });
     } else {
       // Atualizar aula existente
@@ -132,6 +135,9 @@ export const updateWatchTime = async (req: AuthRequest, res: Response) => {
         moduleId,
         completed: false,
         watchedDuration,
+        quizCompleted: false,
+        quizPassed: false,
+        quizAttempts: 0,
       });
     } else {
       progress.completedLessons[lessonIndex].watchedDuration = watchedDuration;
@@ -210,7 +216,7 @@ export const checkLessonAccess = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Verificar se a aula anterior foi completada
+    // Verificar se a aula anterior foi completada (vídeo + quiz)
     let previousCompleted = false;
 
     if (lessonIndex > 0) {
@@ -218,9 +224,15 @@ export const checkLessonAccess = async (req: AuthRequest, res: Response) => {
       const previousLesson = module.lessons[lessonIndex - 1];
       const previousLessonId = previousLesson._id?.toString();
       if (previousLessonId) {
-        previousCompleted = progress?.completedLessons.some(
-          (l) => l.lessonId === previousLessonId && l.moduleId === moduleId && l.completed
-        ) || false;
+        const prevProgress = progress?.completedLessons.find(
+          (l) => l.lessonId === previousLessonId && l.moduleId === moduleId
+        );
+        // Aula anterior deve ter vídeo completo E quiz aprovado (se existir quiz)
+        if (prevProgress) {
+          const hasQuiz = previousLesson.quiz && previousLesson.quiz.length > 0;
+          previousCompleted = prevProgress.completed && 
+                            (!hasQuiz || (prevProgress.quizCompleted && prevProgress.quizPassed));
+        }
       }
     } else if (moduleIndex > 0) {
       // Última aula do módulo anterior
@@ -231,9 +243,14 @@ export const checkLessonAccess = async (req: AuthRequest, res: Response) => {
         const lastLessonId = lastLesson._id?.toString();
         
         if (previousModuleId && lastLessonId) {
-          previousCompleted = progress?.completedLessons.some(
-            (l) => l.lessonId === lastLessonId && l.moduleId === previousModuleId && l.completed
-          ) || false;
+          const prevProgress = progress?.completedLessons.find(
+            (l) => l.lessonId === lastLessonId && l.moduleId === previousModuleId
+          );
+          if (prevProgress) {
+            const hasQuiz = lastLesson.quiz && lastLesson.quiz.length > 0;
+            previousCompleted = prevProgress.completed && 
+                              (!hasQuiz || (prevProgress.quizCompleted && prevProgress.quizPassed));
+          }
         }
       }
     }

@@ -52,6 +52,17 @@ export interface IResource {
   size?: number;
 }
 
+export interface IQuizOption {
+  text: string;
+  isCorrect: boolean;
+}
+
+export interface IQuizQuestion {
+  question: string;
+  options: IQuizOption[];
+  order: number;
+}
+
 export interface ILesson {
   _id?: string;
   title: string;
@@ -63,6 +74,7 @@ export interface ILesson {
   order: number;
   resources?: IResource[];
   isPreview?: boolean;
+  quiz?: IQuizQuestion[];
 }
 
 export interface IModule {

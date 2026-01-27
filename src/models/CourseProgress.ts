@@ -6,6 +6,10 @@ export interface ILessonProgress {
   completed: boolean;
   completedAt?: Date;
   watchedDuration: number; // segundos assistidos
+  quizCompleted: boolean;
+  quizScore?: number; // 0-100
+  quizPassed: boolean; // true se score >= 80
+  quizAttempts: number; // número de tentativas do quiz
 }
 
 export interface ICourseProgress extends Document {
@@ -36,6 +40,23 @@ const lessonProgressSchema = new Schema({
   },
   completedAt: Date,
   watchedDuration: {
+    type: Number,
+    default: 0,
+  },
+  quizCompleted: {
+    type: Boolean,
+    default: false,
+  },
+  quizScore: {
+    type: Number,
+    min: 0,
+    max: 100,
+  },
+  quizPassed: {
+    type: Boolean,
+    default: false,
+  },
+  quizAttempts: {
     type: Number,
     default: 0,
   },
