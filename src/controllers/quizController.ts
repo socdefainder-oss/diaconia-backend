@@ -66,6 +66,8 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
     const { answers } = req.body; // Array de { questionIndex, selectedOption }
     const userId = req.user?._id;
 
+    console.log('Submit quiz received:', { courseId, moduleId, lessonId, userId, answersCount: answers?.length });
+
     if (!userId) {
       return res.status(401).json({ message: 'Usuário não autenticado' });
     }
@@ -127,7 +129,7 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
     const attempt = new QuizAttempt({
       user: userId,
       course: courseId,
-      moduleId: moduleId !== 'null' ? moduleId : null,
+      moduleId: (moduleId && moduleId !== 'null' && moduleId !== 'default') ? moduleId : null,
       lessonId,
       answers,
       score,
@@ -137,6 +139,7 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
     });
 
     await attempt.save();
+    console.log('Quiz attempt saved:', { userId, courseId, lessonId, score, passed });
 
     // Atualizar progresso do curso
     let progress = await CourseProgress.findOne({ userId, courseId });
@@ -151,15 +154,18 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
     }
 
     // Atualizar ou adicionar progresso da aula
+    const normalizedModuleId = (moduleId && moduleId !== 'null' && moduleId !== 'default') ? moduleId : '';
     const lessonProgressIndex = progress.completedLessons.findIndex(
-      (lp: any) => lp.lessonId === lessonId && lp.moduleId === (moduleId || '')
+      (lp: any) => lp.lessonId.toString() === lessonId.toString() && lp.moduleId === normalizedModuleId
     );
+
+    console.log('Looking for lesson progress:', { lessonId, normalizedModuleId, found: lessonProgressIndex >= 0 });
 
     if (lessonProgressIndex >= 0) {
       progress.completedLessons[lessonProgressIndex].quizCompleted = true;
       progress.completedLessons[lessonProgressIndex].quizScore = score;
       progress.completedLessons[lessonProgressIndex].quizPassed = passed;
-      progress.completedLessons[lessonProgressIndex].quizAttempts += 1;
+      progress.completedLessons[lessonProgressIndex].quizAttempts = (progress.completedLessons[lessonProgressIndex].quizAttempts || 0) + 1;
 
       // Marcar aula como completada se vídeo foi assistido E quiz foi passado
       const lessonProgress = progress.completedLessons[lessonProgressIndex];
@@ -167,11 +173,12 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
         lessonProgress.completed = true;
         lessonProgress.completedAt = new Date();
       }
+      console.log('Updated existing lesson progress');
     } else {
       // Adicionar novo progresso
       progress.completedLessons.push({
         lessonId,
-        moduleId: moduleId || '',
+        moduleId: normalizedModuleId,
         completed: false, // Só será true quando vídeo E quiz forem concluídos
         watchedDuration: 0,
         quizCompleted: true,
@@ -188,6 +195,7 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
     progress.lastAccessedAt = new Date();
 
     await progress.save();
+    console.log('Progress saved successfully');
 
     res.json({
       success: true,
@@ -200,6 +208,7 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
         : 'Você precisa acertar pelo menos 4 questões para avançar. Tente novamente após revisar o conteúdo.',
       results: detailedResults,
     });
+    console.log('Response sent:', { score, passed, correctAnswers });
     return;
   } catch (error) {
     console.error('Erro ao submeter quiz:', error);
