@@ -32,7 +32,7 @@ const lessonProgressSchema = new Schema({
   },
   moduleId: {
     type: String,
-    required: true,
+    default: '',
   },
   completed: {
     type: Boolean,
