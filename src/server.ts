@@ -25,6 +25,7 @@ import progressRoutes from './routes/progressRoutes';
 import certificateRoutes from './routes/certificateRoutes';
 import teamRoutes from './routes/teamRoutes';
 import debugRoutes from './routes/debugRoutes';
+import syncRoutes from './routes/syncRoutes';
 
 // Inicializar app
 const app: Application = express();
@@ -133,6 +134,7 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/progress', progressRoutes);
 app.use('/api/certificates', certificateRoutes);
 app.use('/api/teams', teamRoutes);
+app.use('/api/sync', syncRoutes);
 app.use('/api/debug', debugRoutes); // Rota de debug temporária
 
 // 404 handler
