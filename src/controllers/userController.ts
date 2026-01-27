@@ -1,10 +1,11 @@
 import { Response } from 'express';
 import User from '../models/User';
+import Team from '../models/Team';
 import { AuthRequest, ApiResponse, UserRole } from '../types';
 
 export const createUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { name, email, password, role, phone } = req.body;
+    const { name, email, password, role, phone, team } = req.body;
 
     // Verificar se usuário já existe
     const userExists = await User.findOne({ email });
@@ -23,7 +24,16 @@ export const createUser = async (req: AuthRequest, res: Response): Promise<void>
       password,
       role: role || UserRole.ALUNO,
       phone,
+      team,
     });
+
+    // Se foi fornecido um team, adicionar o usuário ao time
+    if (team) {
+      await Team.findByIdAndUpdate(
+        team,
+        { $addToSet: { members: user._id } }
+      );
+    }
 
     res.status(201).json({
       success: true,
@@ -109,6 +119,17 @@ export const getUser = async (req: AuthRequest, res: Response): Promise<void> =>
 
 export const updateUser = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
+    // Buscar usuário anterior para comparar o time
+    const oldUser = await User.findById(req.params.id);
+    
+    if (!oldUser) {
+      res.status(404).json({
+        success: false,
+        message: 'Usuário não encontrado',
+      } as ApiResponse);
+      return;
+    }
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -121,6 +142,28 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
         message: 'Usuário não encontrado',
       } as ApiResponse);
       return;
+    }
+
+    // Se o time mudou, atualizar os times
+    if (req.body.team) {
+      const newTeamId = req.body.team;
+      const oldTeamId = oldUser.team?.toString();
+
+      // Se tinha um time anterior e mudou, remover do time antigo
+      if (oldTeamId && oldTeamId !== newTeamId) {
+        await Team.findByIdAndUpdate(
+          oldTeamId,
+          { $pull: { members: user._id } }
+        );
+      }
+
+      // Adicionar ao novo time (se não estava antes)
+      if (!oldTeamId || oldTeamId !== newTeamId) {
+        await Team.findByIdAndUpdate(
+          newTeamId,
+          { $addToSet: { members: user._id } }
+        );
+      }
     }
 
     res.status(200).json({
