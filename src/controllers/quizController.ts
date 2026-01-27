@@ -18,16 +18,21 @@ export const getQuizQuestions = async (req: AuthRequest, res: Response) => {
     // Encontrar a aula
     let lesson: any = null;
     
-    if (moduleId && moduleId !== 'null' && course.modules) {
+    // Se moduleId for 'default' ou null/undefined, buscar direto nas lessons do curso
+    if (!moduleId || moduleId === 'null' || moduleId === 'default') {
+      if (course.lessons) {
+        lesson = course.lessons.find((l: any) => l._id.toString() === lessonId);
+      }
+    } else if (course.modules) {
+      // Se tem moduleId válido, buscar no módulo
       const module = course.modules.find((m: any) => m._id.toString() === moduleId);
       if (module) {
         lesson = module.lessons.find((l: any) => l._id.toString() === lessonId);
       }
-    } else if (course.lessons) {
-      lesson = course.lessons.find((l: any) => l._id.toString() === lessonId);
     }
 
     if (!lesson) {
+      console.error('Aula não encontrada:', { courseId, moduleId, lessonId, hasModules: !!course.modules, hasLessons: !!course.lessons });
       return res.status(404).json({ message: 'Aula não encontrada' });
     }
 
@@ -78,16 +83,21 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
     // Encontrar a aula
     let lesson: any = null;
     
-    if (moduleId && moduleId !== 'null' && course.modules) {
+    // Se moduleId for 'default' ou null/undefined, buscar direto nas lessons do curso
+    if (!moduleId || moduleId === 'null' || moduleId === 'default') {
+      if (course.lessons) {
+        lesson = course.lessons.find((l: any) => l._id.toString() === lessonId);
+      }
+    } else if (course.modules) {
+      // Se tem moduleId válido, buscar no módulo
       const module = course.modules.find((m: any) => m._id.toString() === moduleId);
       if (module) {
         lesson = module.lessons.find((l: any) => l._id.toString() === lessonId);
       }
-    } else if (course.lessons) {
-      lesson = course.lessons.find((l: any) => l._id.toString() === lessonId);
     }
 
     if (!lesson || !lesson.quiz || lesson.quiz.length !== 5) {
+      console.error('Quiz não encontrado:', { courseId, moduleId, lessonId, hasLesson: !!lesson, quizLength: lesson?.quiz?.length });
       return res.status(404).json({ message: 'Quiz não encontrado ou incompleto' });
     }
 
