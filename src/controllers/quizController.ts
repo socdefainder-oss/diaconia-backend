@@ -171,20 +171,20 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
       progress.completedLessons[lessonProgressIndex].quizPassed = passed;
       progress.completedLessons[lessonProgressIndex].quizAttempts = (progress.completedLessons[lessonProgressIndex].quizAttempts || 0) + 1;
 
-      // Marcar aula como completada se vídeo foi assistido E quiz foi passado
-      const lessonProgress = progress.completedLessons[lessonProgressIndex];
-      if (lessonProgress.watchedDuration > 0 && passed) {
-        lessonProgress.completed = true;
-        lessonProgress.completedAt = new Date();
+      // Se a aula tem quiz e o aluno passou, marcar como completada
+      // (não precisa verificar watchedDuration pois o quiz já garante que o conteúdo foi estudado)
+      if (passed) {
+        progress.completedLessons[lessonProgressIndex].completed = true;
+        progress.completedLessons[lessonProgressIndex].completedAt = new Date();
       }
-      console.log('Updated existing lesson progress');
+      console.log('Updated existing lesson progress', { completed: progress.completedLessons[lessonProgressIndex].completed });
     } else {
       // Adicionar novo progresso
       console.log('Creating new lesson progress entry');
       progress.completedLessons.push({
         lessonId,
         moduleId: normalizedModuleId,
-        completed: false, // Só será true quando vídeo E quiz forem concluídos
+        completed: passed, // Se passou no quiz, marcar como concluída
         watchedDuration: 0,
         quizCompleted: true,
         quizScore: score,
@@ -192,6 +192,7 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
         quizAttempts: 1,
         completedAt: passed ? new Date() : undefined,
       } as any);
+      console.log('Created new lesson progress', { completed: passed });
     }
 
     // Recalcular progresso geral
