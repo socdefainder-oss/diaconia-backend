@@ -204,7 +204,7 @@ export const submitQuiz = async (req: AuthRequest, res: Response) => {
     }
     
     const completedCount = progress.completedLessons.filter((lp: any) => lp.completed).length;
-    progress.progress = totalLessons > 0 ? (completedCount / totalLessons) * 100 : 0;
+    progress.progress = totalLessons > 0 ? Math.min((completedCount / totalLessons) * 100, 100) : 0;
     progress.completed = completedCount >= totalLessons && totalLessons > 0;
     progress.lastAccessedAt = new Date();
 
