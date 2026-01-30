@@ -130,10 +130,19 @@ export const updateUser = async (req: AuthRequest, res: Response): Promise<void>
       return;
     }
 
-    // Atualizar usando save() para disparar o hook de hash de senha
-    Object.assign(oldUser, req.body);
-    await oldUser.save();
-    const user = oldUser;
+    // ALTERADO: usando save() ao inv�s de findByIdAndUpdate para hashear senha`n    Object.assign(oldUser, req.body);`n    await oldUser.save();`n    const user = oldUser; // await User.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true, runValidators: true }
+    );
+
+    if (!user) {
+      res.status(404).json({
+        success: false,
+        message: 'Usuário não encontrado',
+      } as ApiResponse);
+      return;
+    }
 
     // Se o time mudou, atualizar os times
     if (req.body.team) {
